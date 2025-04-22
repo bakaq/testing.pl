@@ -17,7 +17,7 @@ example(2).
 You could then write a `my_module_tests.pl` with contents:
 
 ```prolog
-:- use_module(library(testing)).
+:- use_module(testing).
 
 :- use_module(my_module).
 
@@ -76,6 +76,8 @@ Running tests in module user.
 After running, `run_tests/1` exits with a status code of 0 if all tests that were run succeeded and
 1 otherwise. This makes it possible to check if tests pass inside scripts.
 */
+
+% SPDX-License-Identifier: Unlicense
 
 :- module(testing, [run_tests/0, run_tests/1]).
 
