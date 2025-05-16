@@ -186,6 +186,8 @@ ansi(true, green) --> "\x1b\[32;1m".
 ansi(true, white) --> "\x1b\[37;1m".
 ansi(false, _) --> [].
 
+:- meta_predicate(portray(:)).
+
 portray(GRBody) :-
     phrase_to_stream(GRBody, user_output).
 
