@@ -102,14 +102,17 @@ run_tests :- run_tests([]).
 %    contain the string in their names. Default: `no_filter`.
 % - `color(+Color)`: Either `true` or `false` to indicate if the output should be colored or not.
 %   Default: `true`.
+% - `halt(+Halt)`: Either `true` or `false` to indicate if we should halt after the tests.
+%   If this is set to `false` and any of the tests fail, then `run_tests/1` fails. Default: `true`.
 run_tests(Options) :-
     must_be(list, Options),
     options_option_default(Options, modules(Modules), [user]),
     options_option_default(Options, filter(Filter), no_filter),
     options_option_default(Options, color(Color), true),
-    run_tests_opt(Modules, Color, Filter).
+    options_option_default(Options, halt(Halt), true),
+    run_tests_opt(Modules, Color, Filter, Halt).
 
-run_tests_opt(Modules, Color, Filter) :-
+run_tests_opt(Modules, Color, Filter, Halt) :-
     maplist(module_mtests, Modules, MTests),
     maplist(
         [Color,Filter]+\(Module-Tests)^Succ^run_tests_module_opt(Module, Tests, Color, Filter, Succ),
@@ -117,8 +120,14 @@ run_tests_opt(Modules, Color, Filter) :-
         Successes
     ),
     (   all_succeeded(Successes) ->
-        halt
-    ;   halt(1)
+        (   Halt == true ->
+            halt
+        ;   true
+        )
+    ;   (   Halt == true ->
+            halt(1)
+        ;   false
+        )
     ).
 
 module_tests(Module, Tests) :-
