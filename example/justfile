@@ -1,0 +1,33 @@
+default:
+    @just --list
+
+# Dumps the current output of the test
+dump: make_snapshot && diff_dump
+    rm --recursive --force tests_dump
+    mv tests_snapshot_tmp tests_dump
+
+# Diffs the dump and the snapshot
+diff_dump:
+    -diff --unified --color=always tests_snapshot tests_dump
+
+# Snapshots the current test output
+snapshot: make_snapshot
+    -diff --unified --color=always tests_snapshot tests_snapshot_tmp
+    rm --recursive --force tests_snapshot
+    mv tests_snapshot_tmp tests_snapshot
+
+make_snapshot:
+    #!/bin/sh
+    set -eu 
+
+    rm --recursive --force tests_snapshot_tmp
+    mkdir tests_snapshot_tmp
+    ret=0
+    scryer-prolog -f -g run_tests example.pl \
+        > tests_snapshot_tmp/out 2> tests_snapshot_tmp/err || ret=$?
+    printf '%s' "$ret" > tests_snapshot_tmp/status
+
+test: make_snapshot
+    diff --unified --color=always tests_snapshot tests_snapshot_tmp \
+        || (rm --recursive --force tests_snapshot_tmp && false)
+    rm --recursive --force tests_snapshot_tmp
