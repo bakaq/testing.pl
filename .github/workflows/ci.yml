@@ -1,0 +1,26 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+  run-ci:
+    name: Run CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+      - name: Setup Cachix
+        uses: cachix/cachix-action@v16
+        with:
+          name: pkg-pl
+      - name: Run CI
+        run: |
+          nix develop --ignore-env --command \
+            just ci

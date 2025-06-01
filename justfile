@@ -3,3 +3,5 @@ default:
 
 test:
     just example/test
+
+ci: test
