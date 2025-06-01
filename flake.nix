@@ -26,6 +26,7 @@
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               just
+              trealla
             ] ++ [
               (scryer-prolog.packages.${system}.default.overrideAttrs (
                 final: prev: {
