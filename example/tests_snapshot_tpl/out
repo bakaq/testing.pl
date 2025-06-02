@@ -1,0 +1,5 @@
+Running tests in module [37;1muser[0m.
+  test "successful test" ... [32;1msucceeded[0m
+  test "failing test" ... [31;1mfailed[0m
+  test "exception test" ... [31;1mexception(example_exception)[0m
+  test "error test" ... [31;1merror(instantiation_error,atomic)[0m
