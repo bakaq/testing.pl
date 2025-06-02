@@ -2,32 +2,33 @@ default:
     @just --list
 
 # Dumps the current output of the test
-dump: make_snapshot && diff_dump
-    rm --recursive --force tests_dump
-    mv tests_snapshot_tmp tests_dump
-
-# Diffs the dump and the snapshot
-diff_dump:
-    -diff --unified --color=always tests_snapshot tests_dump
+dump prolog="scryer-prolog": (make_snapshot prolog)
+    rm --recursive --force tests_dump_{{prolog}}
+    mv tests_snapshot_tmp_{{prolog}} tests_dump_{{prolog}}
+    -diff --unified --color=always tests_snapshot_{{prolog}} tests_dump_{{prolog}}
 
 # Snapshots the current test output
-snapshot: make_snapshot
-    -diff --unified --color=always tests_snapshot tests_snapshot_tmp
-    rm --recursive --force tests_snapshot
-    mv tests_snapshot_tmp tests_snapshot
+snapshot prolog="scryer-prolog": (make_snapshot prolog)
+    -diff --unified --color=always tests_snapshot_{{prolog}} tests_snapshot_tmp_{{prolog}}
+    rm --recursive --force tests_snapshot_{{prolog}}
+    mv tests_snapshot_tmp_{{prolog}} tests_snapshot_{{prolog}}
 
-make_snapshot:
+make_snapshot prolog="scryer-prolog":
     #!/bin/sh
     set -eu 
 
-    rm --recursive --force tests_snapshot_tmp
-    mkdir tests_snapshot_tmp
-    ret=0
-    scryer-prolog -f -g run_tests example.pl \
-        > tests_snapshot_tmp/out 2> tests_snapshot_tmp/err || ret=$?
-    printf '%s' "$ret" > tests_snapshot_tmp/status
+    printf '%s\n' "Running tests with {{prolog}}"
 
-test: make_snapshot
-    diff --unified --color=always tests_snapshot tests_snapshot_tmp \
-        || (rm --recursive --force tests_snapshot_tmp && false)
-    rm --recursive --force tests_snapshot_tmp
+    rm --recursive --force tests_snapshot_tmp_{{prolog}}
+    mkdir tests_snapshot_tmp_{{prolog}}
+    ret=0
+    {{prolog}} -f -g run_tests example.pl \
+        > tests_snapshot_tmp_{{prolog}}/out 2> tests_snapshot_tmp_{{prolog}}/err || ret=$?
+    printf '%s' "$ret" > tests_snapshot_tmp_{{prolog}}/status
+
+test_prolog prolog="scryer-prolog": (make_snapshot prolog)
+    diff --unified --color=always tests_snapshot_{{prolog}} tests_snapshot_tmp_{{prolog}} \
+        || (rm --recursive --force tests_snapshot_tmp_{{prolog}} && false)
+    rm --recursive --force tests_snapshot_tmp_{{prolog}}
+
+test: (test_prolog "scryer-prolog") (test_prolog "tpl")
